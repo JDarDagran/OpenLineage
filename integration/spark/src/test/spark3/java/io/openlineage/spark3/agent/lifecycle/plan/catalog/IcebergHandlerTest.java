@@ -1,6 +1,7 @@
 package io.openlineage.spark3.agent.lifecycle.plan.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -82,5 +83,14 @@ public class IcebergHandlerTest {
         icebergHandler.getTableProviderFacet(new HashMap<>());
     assertEquals("iceberg", tableProviderFacet.get().getProvider());
     assertEquals("", tableProviderFacet.get().getFormat());
+  }
+
+  @Test
+  public void testGetVersionString() {
+    Optional<String> version = icebergHandler
+      .getDatasetVersion(Collections.singletonMap("current-snapshot-id", "1500100900"));
+
+    assertTrue(version.isPresent());
+    assertEquals(version.get(), "15001500900");
   }
 }

@@ -23,5 +23,9 @@ public interface CatalogHandler {
     return Optional.empty();
   }
 
+  default Optional<String> getDatasetVersion(Map<String, String> properties) {
+    return Optional.empty();
+  }
+
   String getName();
 }

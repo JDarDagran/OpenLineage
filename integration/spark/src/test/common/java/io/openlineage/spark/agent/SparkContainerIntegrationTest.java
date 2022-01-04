@@ -321,6 +321,13 @@ public class SparkContainerIntegrationTest {
   }
 
   @Test
+  @EnabledIfSystemProperty(named = "spark.version", matches = SPARK_3) // Spark version >= 3.*
+  public void testReadTableOfParticularVersion() {
+    runPysparkContainerWithDefaultConf("testReadTableWithParticularVersion", "spark_read_particular_version.py");
+    verifyEvents("pysparkReadParticularVersion.json");
+  }
+
+  @Test
   public void testAlterTable() {
     runPysparkContainerWithDefaultConf("testAlterTable", "spark_alter_table.py");
     verifyEvents("pysparkAlterTableAddColumnsEnd.json", "pysparkAlterTableRenameEnd.json");

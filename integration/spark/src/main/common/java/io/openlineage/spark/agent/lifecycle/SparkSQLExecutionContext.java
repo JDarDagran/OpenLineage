@@ -124,6 +124,8 @@ public class SparkSQLExecutionContext implements ExecutionContext {
 
     PartialFunction<LogicalPlan, List<OutputDataset>> planTraversal =
         getPlanTraversal(outputVisitor);
+
+    log.warn(queryExecution.optimizedPlan().toString());
     List<OutputDataset> outputDatasets =
         planTraversal.isDefinedAt(queryExecution.optimizedPlan())
             ? planTraversal.apply(queryExecution.optimizedPlan())
@@ -201,6 +203,7 @@ public class SparkSQLExecutionContext implements ExecutionContext {
       log.debug("Physical plan executed {}", queryExecution.executedPlan().toJSON());
     }
 
+    log.warn(queryExecution.optimizedPlan().toString());
     PartialFunction<LogicalPlan, List<OutputDataset>> outputVisitor =
         PlanUtils.merge(context.getOutputDatasetQueryPlanVisitors());
     PartialFunction<LogicalPlan, List<OutputDataset>> planTraversal =

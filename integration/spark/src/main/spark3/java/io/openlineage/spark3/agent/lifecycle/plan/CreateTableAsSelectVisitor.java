@@ -34,11 +34,12 @@ public class CreateTableAsSelectVisitor
   public List<OpenLineage.OutputDataset> apply(LogicalPlan x) {
     CreateTableAsSelect command = (CreateTableAsSelect) x;
 
-    Map<String, OpenLineage.DefaultDatasetFacet> facetMap = new HashMap<>();
+    Map<String, OpenLineage.DatasetFacet> facetMap = new HashMap<>();
     Map<String, String> tableProperties =
         ScalaConversionUtils.<String, String>fromMap(command.properties());
     facetMap.put("tableStateChange", new TableStateChangeFacet(CREATE));
     PlanUtils3.includeProviderFacet(command.catalog(), tableProperties, facetMap);
+
 
     Optional<DatasetIdentifier> di =
         PlanUtils3.getDatasetIdentifier(

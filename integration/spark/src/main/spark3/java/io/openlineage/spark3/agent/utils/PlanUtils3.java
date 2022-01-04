@@ -48,12 +48,19 @@ public class PlanUtils3 {
   public static void includeProviderFacet(
       TableCatalog catalog,
       Map<String, String> properties,
-      Map<String, OpenLineage.DefaultDatasetFacet> facets) {
+      Map<String, OpenLineage.DatasetFacet> facets) {
     Optional<TableProviderFacet> providerFacet =
         CatalogUtils3.getTableProviderFacet(catalog, properties);
-    if (providerFacet.isPresent()) {
-      facets.put("tableProvider", providerFacet.get());
-    }
+    providerFacet.ifPresent(tableProviderFacet -> facets.put("tableProvider", tableProviderFacet));
+  }
+
+  public static void includeVersionDatasetFacet(
+      OpenLineage openLineage,
+      TableCatalog catalog,
+      Map<String, String> properties,
+      Map<String, OpenLineage.DatasetFacet> facets) {
+    CatalogUtils3.getDatasetVersion(catalog, properties)
+        .ifPresent(s -> facets.put("version", openLineage.newVersionDatasetFacet(s)));
   }
 
   public static <D extends OpenLineage.Dataset> List<D> fromDataSourceV2Relation(
@@ -65,7 +72,7 @@ public class PlanUtils3 {
       DatasetFactory<D> datasetFactory,
       OpenLineageContext context,
       DataSourceV2Relation relation,
-      Map<String, OpenLineage.DefaultDatasetFacet> facets) {
+      Map<String, OpenLineage.DatasetFacet> facets) {
 
     if (relation.identifier().isEmpty()) {
       throw new IllegalArgumentException(
@@ -81,14 +88,18 @@ public class PlanUtils3 {
     Map<String, String> tableProperties = relation.table().properties();
 
     includeProviderFacet(tableCatalog, tableProperties, facets);
+    includeVersionDatasetFacet(context.getOpenLineage(), tableCatalog, tableProperties, facets);
+
     Optional<DatasetIdentifier> datasetIdentifier =
         PlanUtils3.getDatasetIdentifier(context, tableCatalog, identifier, tableProperties);
 
-    if (datasetIdentifier.isPresent()) {
-      return Collections.singletonList(
-          datasetFactory.getDataset(datasetIdentifier.get(), relation.schema(), facets));
-    } else {
-      return Collections.emptyList();
-    }
+    log.warn(String.format("%s - %s", datasetIdentifier.get().getName(), tableProperties.toString()));
+
+    return datasetIdentifier
+        .map(
+            value ->
+                Collections.singletonList(
+                    datasetFactory.getDataset(value, relation.schema(), facets)))
+        .orElse(Collections.emptyList());
   }
 }

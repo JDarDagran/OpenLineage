@@ -59,6 +59,14 @@ public class CatalogUtils3 {
         : Optional.empty();
   }
 
+  public static Optional<String> getDatasetVersion(
+      TableCatalog catalog, Map<String, String> properties) {
+    Optional<CatalogHandler> catalogHandler = getCatalogHandler(catalog);
+    return catalogHandler.isPresent()
+        ? catalogHandler.get().getDatasetVersion(properties)
+        : Optional.empty();
+  }
+
   public static Optional<CatalogHandler> getCatalogHandlerByProvider(String provider) {
     return catalogHandlers.stream()
         .filter(handler -> handler.getName().equalsIgnoreCase(provider))

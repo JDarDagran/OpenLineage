@@ -98,6 +98,15 @@ public class IcebergHandler implements CatalogHandler {
     return Optional.of(new TableProviderFacet("iceberg", format.replace("iceberg/", "")));
   }
 
+  public Optional<String> getDatasetVersion(Map<String, String> properties) {
+    String snapshotId = properties.get("current-snapshot-id");
+    if (snapshotId != null) {
+      return Optional.of(snapshotId);
+    }
+    return Optional.empty();
+  }
+
+
   @Override
   public String getName() {
     return "iceberg";

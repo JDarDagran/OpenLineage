@@ -88,9 +88,7 @@ public abstract class DatasetFactory<D extends OpenLineage.Dataset> {
   }
 
   public D getDataset(
-      DatasetIdentifier ident,
-      StructType schema,
-      Map<String, OpenLineage.DefaultDatasetFacet> facets) {
+      DatasetIdentifier ident, StructType schema, Map<String, OpenLineage.DatasetFacet> facets) {
     OpenLineage.DatasetFacetsBuilder builder =
         openLineage
             .newDatasetFacetsBuilder()
