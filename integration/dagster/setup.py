@@ -17,7 +17,7 @@ DAGSTER_VERSION = "1.0.0"
 requirements = [
     "attrs>=19.3",
     "cattrs",
-    "protobuf<=3.20.0",
+    "protobuf<=3.20.3",
     f"dagster>={DAGSTER_VERSION}",
     f"openlineage-python=={__version__}",
 ]
