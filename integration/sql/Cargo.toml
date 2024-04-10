@@ -2,4 +2,4 @@
 members = ["impl", "iface-py", "iface-java"]
 
 [workspace.dependencies]
-anyhow = "1.0.6"
+anyhow = "1.0.82"
