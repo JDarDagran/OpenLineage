@@ -188,7 +188,4 @@ jobs:
 workflows:
   schedule_workflow:
     jobs:
-      - determine_changed_modules:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+){2}(-rc\.[0-9]+)?$/
+      - determine_changed_modules
