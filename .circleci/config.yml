@@ -160,7 +160,7 @@ jobs:
                       for approval in approvals:
                           approval_name = next(iter(approval))
                           approval_upstreams = approval[approval_name].get('requires')
-                          approval_downstream = list(filter(lambda x: isinstance(x, dict) and approval_name in list(x.values())[0].get('requires'), jobs))
+                          approval_downstream = list(filter(lambda x: isinstance(x, dict) and approval_name in list(x.values())[0].get('requires', ''), jobs))
                           # replace approval with its upstream jobs
                           for job in approval_downstream:
                               requires = next(iter(job.values()))['requires']
