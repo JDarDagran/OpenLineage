@@ -47,13 +47,18 @@ commands:
           export RELEASE_USERNAME=$(echo $OSSRH_TOKEN_USERNAME)
 
           ./gradlew --console=plain publishToSonatype closeSonatypeStagingRepository --info
-  set_java_17:
-    description: Set Java to Java 17
+  set_java_version:
+    parameters:
+        java_version:
+          type: string
+          description: "Java version to set"
+          default: "17"
+    description: Set Java to chosen version
     steps:
       - run:
           name: Java version Variable
           command: |
-            JAVA=17
+            JAVA=<< parameters.java_version >>
 
             JAVA8_HOME='/usr/lib/jvm/java-8-openjdk-amd64'
             JAVA17_HOME='/usr/lib/jvm/java-17-openjdk-amd64'
@@ -522,7 +527,7 @@ jobs:
       - run:
           name: Generate cache key
           command: ./../../.circleci/checksum.sh /tmp/checksum.txt $CIRCLE_BRANCH
-      - set_java_17
+      - set_java_version
       - restore_cache:
           keys:
             - v1-integration-spark-{{ checksum "/tmp/checksum.txt" }}
@@ -849,7 +854,7 @@ jobs:
             - restore_cache:
                 keys:
                   - v1-configurable-integration-test
-            - set_java_17
+            - set_java_version
             - run: ./integration/spark/cli/configurable-test.sh --spark ./integration/spark/cli/spark-conf.yml --test ./integration/spark/cli/tests
             - run: ./integration/spark/cli/configurable-test.sh --spark ./integration/spark/cli/spark-conf-docker.yml --test ./integration/spark/cli/tests
             - store_artifacts:
@@ -875,7 +880,7 @@ jobs:
       - restore_cache:
           keys:
             - v1-integration-spark-{{ checksum "/tmp/checksum.txt" }}
-      - set_java_17
+      - set_java_version
       - attach_workspace:
           at: ~/
       - run: ./gradlew --no-daemon --console=plain clean jarVerification -Pscala.binary.version=2.12 -Pjava.compile.home=${JAVA17_HOME}
@@ -938,7 +943,7 @@ jobs:
             - v1-integration-flink-{{ checksum "/tmp/checksum.txt" }}
       - attach_workspace:
           at: ~/
-      - set_java_17
+      - set_java_version
       - run: chmod -R 777 data/iceberg/db
       - run: ./gradlew --console=plain examples:stateful:build -Pflink.version=<< parameters.flink-version >>
       - run: ./gradlew --no-daemon --console=plain integrationTest --i -Pflink.version=<< parameters.flink-version >>
@@ -1098,33 +1103,56 @@ jobs:
     # this job run pre-commit for Python client only
     # add dependency to other files when pre-commit runs related checks
     working_directory: ~/openlineage
-    docker:
-      - image: cimg/python:3.8
+    machine:
+      image: ubuntu-2404:current
     steps:
       - *checkout_project_root
       - restore_cache:
+          name: Restore pre-commit cache
           keys:
-          - v1.2-precommit-deps-{{ checksum ".pre-commit-config.yaml" }}
+          - v1.4-precommit-deps-{{ checksum ".pre-commit-config.yaml" }}
+      - restore_cache:
+          name: Restore pmd cache
+          keys:
+          - v1.0-pmd-{{ checksum ".pre_commit/run-pmd.sh" }}
+          - v1.0-pmd-
+      # - restore_cache:
+      #     name: Restore Gradle cache from Java client
+      #     keys:
+      #     - v1-client-java-
+      - restore_cache:
+          name: Restore Gradle cache from Spark integration
+          keys:
+          - v1-integration-spark-
+
 
       - run:
-          name: Install Dependencies
+          name: Install Python3.8 Dependencies
           command: |
-            python3.8 -m venv venv
+            python -m venv venv
             . venv/bin/activate
             pip3 install pre-commit
             # Install the hooks now so that they'll be cached
             pre-commit install-hooks
+
       - save_cache:
           paths:
             - ~/.cache/pre-commit
-          key: v1.2-precommit-deps-{{ checksum ".pre-commit-config.yaml" }}
+          key: v1.4-precommit-deps-{{ checksum ".pre-commit-config.yaml" }}
+          name: Save pre-commit cache
 
       - run:
           name: Run pre-commit
           command: |
             . venv/bin/activate
-            SKIP= && [ -n "${CI}" ] && export SKIP="pmd"
-            pre-commit run --show-diff-on-failure --all-files
+            # SKIP= && [ -n "${CI}" ] && export SKIP="pmd"
+            pre-commit run --show-diff-on-failure --all-files -vvv
+
+      - save_cache:
+          paths:
+            - ./.pmd_cache
+          key: v1.0-pmd-{{ checksum ".pre_commit/run-pmd.sh" }}
+          name: Save pmd cache
 
   build-website:
     # Build Openlineage website to make sure npm packages match
