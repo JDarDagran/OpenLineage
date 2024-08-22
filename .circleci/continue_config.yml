@@ -1174,6 +1174,7 @@ jobs:
       - image: cimg/python:3.8
     steps:
       - *checkout_project_root
+      - setup_remote_docker
       - restore_cache:
           keys:
           - v1.2-precommit-deps-{{ checksum ".pre-commit-config.yaml" }}

@@ -107,3 +107,17 @@ repos:
         files: ^client/java/src/.*\.java$
         exclude: ".*test.*"
         require_serial: true
+      - id: generate-openapi-doc
+        name: Generate OpenAPI doc
+        language: node
+        entry: redocly build-docs spec/OpenLineage.yml  -o website/static/apidocs/openapi/index.html --title 'OpenLineage API Docs'
+        files: ^spec/OpenLineage.yml$
+        pass_filenames: false
+        additional_dependencies: ["@redocly/cli@latest"]
+        always_run: true
+      - id: generate-javadoc
+        name: Generate Java client doc
+        language: docker_image
+        entry: -v .:/tmp/openlineage cimg/openjdk:17.0 bash -c "cd /tmp/openlineage/client/java && ./gradlew javadoc && rm -rf /tmp/openlineage/website/static/apidocs/javadoc && mv ./build/docs/javadoc /tmp/openlineage/website/static/apidocs/"
+        pass_filenames: false
+        always_run: true
