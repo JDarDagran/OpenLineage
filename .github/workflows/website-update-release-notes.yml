@@ -1,4 +1,4 @@
-name: Version documentation
+name: Publish release notes to docs.
 
 on:
   release:
