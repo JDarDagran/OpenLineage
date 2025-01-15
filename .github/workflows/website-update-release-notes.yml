@@ -14,16 +14,6 @@ jobs:
     steps:
       - name: Checkout source repository
         uses: actions/checkout@v4
-        with:
-          path: 'source'
-          fetch-depth: 0
-          fetch-tags: true
-      - name: Checkout target repository
-        uses: actions/checkout@v4
-        with:
-          repository: 'Openlineage/openlineage-site'
-          path: 'target'
-      # Print debug content of release notes from webhook
       - name: Print release notes
         run: |
           echo "Release notes: ${{ github.event.release.body }}"
