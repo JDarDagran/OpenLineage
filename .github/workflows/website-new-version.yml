@@ -20,7 +20,7 @@ jobs:
           fetch-tags: true
       - uses: actions/checkout@v4
         with:
-          repository: 'OpenLineage/openlineage-site'
+          repository: 'JDarDagran/openlineage-site'
           path: 'target'
           token:  ${{ secrets.ACTIONS_GITHUB_TOKEN }}
       - uses: actions/setup-node@v4
